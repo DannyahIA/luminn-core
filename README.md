@@ -1,44 +1,43 @@
 # Automation Hub Core
 
-O núcleo do Automation Hub, responsável por orquestrar automações e integrações usando arquitetura hexagonal e GraphQL.
+The core of Automation Hub, responsible for orchestrating automations and integrations using hexagonal architecture and GraphQL.
 
-## 🏗️ Arquitetura
+## 🏗️ Architecture
 
-Este projeto segue a **arquitetura hexagonal** (ports & adapters) com as seguintes camadas:
+This project follows **hexagonal architecture** (ports & adapters) with the following layers:
 
-- **Domain**: Entidades e regras de negócio puras
-- **Application**: Casos de uso que orquestram o fluxo
-- **Infrastructure**: Implementações concretas (repositórios, executores)
-- **Interfaces**: Resolvers GraphQL e controladores
+- **Domain**: Pure business entities and rules
+- **Application**: Use cases that orchestrate the flow
+- **Infrastructure**: Concrete implementations (repositories, executors)
+- **Interfaces**: GraphQL resolvers and controllers
 
-## 🚀 Início Rápido
+## 🚀 Quick Start
 
-### Pré-requisitos
+### Prerequisites
 
 - Go 1.22+
 - Git
-- Docker (opcional, para desenvolvimento com serviços externos)
+- Docker (optional, for development with external services)
 
-### Instalação
+### Installation
 
-1. Clone o repositório:
+1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd automation-hub
+git clone https://github.com/DannyahIA/automation-hub-core.git
+cd automation-hub-core
 ```
 
-2. Inicialize o módulo Go e instale dependências:
+2. Initialize Go module and install dependencies:
 ```bash
-go mod init automation-hub
 go mod tidy
 ```
 
-3. Gere o código GraphQL:
+3. Generate GraphQL code:
 ```bash
 go run github.com/99designs/gqlgen@latest generate
 ```
 
-4. Execute a aplicação:
+4. Run the application:
 
 **Linux/macOS:**
 ```bash
@@ -48,77 +47,77 @@ go run cmd/hub-core/main.go
 **Windows (PowerShell):**
 ```powershell
 go run cmd/hub-core/main.go
-# Ou use o script helper:
+# Or use the helper script:
 .\dev.ps1 run
 ```
 
-5. Acesse o GraphQL Playground:
+5. Access the GraphQL Playground:
 ```
 http://localhost:8080
 ```
 
-### Scripts Helper para Windows
+### Windows Helper Scripts
 
-Para usuários Windows, foram incluídos scripts PowerShell para facilitar o desenvolvimento:
+For Windows users, PowerShell scripts are included to facilitate development:
 
-**Script de desenvolvimento (`dev.ps1`):**
+**Development script (`dev.ps1`):**
 ```powershell
-# Compilar aplicação
+# Build application
 .\dev.ps1 build
 
-# Executar aplicação
+# Run application
 .\dev.ps1 run
 
-# Executar testes
+# Run tests
 .\dev.ps1 test
 
-# Iniciar serviços Docker
+# Start Docker services
 .\dev.ps1 docker-up
 
-# Parar serviços Docker
+# Stop Docker services
 .\dev.ps1 docker-down
 
-# Limpar artefatos
+# Clean artifacts
 .\dev.ps1 clean
 
-# Baixar dependências
+# Download dependencies
 .\dev.ps1 deps
 
-# Gerar código GraphQL
+# Generate GraphQL code
 .\dev.ps1 gen
 
-# Ver ajuda
+# Show help
 .\dev.ps1 help
 ```
 
-**Script de exemplo da API (`examples/api_usage_example.ps1`):**
+**API example script (`examples/api_usage_example.ps1`):**
 ```powershell
-# Executar exemplos básicos
+# Run basic examples
 .\examples\api_usage_example.ps1
 
-# Executar com saída detalhada
+# Run with detailed output
 .\examples\api_usage_example.ps1 -Verbose
 
-# Usar URL diferente
+# Use different URL
 .\examples\api_usage_example.ps1 -ApiUrl "http://localhost:9000/query"
 ```
 
-## 📁 Estrutura do Projeto
+## 📁 Project Structure
 
 ```
-automation-hub/
+automation-hub-core/
 ├── cmd/
 │   └── hub-core/
-│       └── main.go                 # Ponto de entrada
+│       └── main.go                 # Entry point
 ├── internal/
-│   ├── domain/                     # Entidades e interfaces
+│   ├── domain/                     # Entities and interfaces
 │   │   ├── task.go
 │   │   ├── workflow.go
 │   │   └── interfaces.go
-│   ├── application/                # Casos de uso
+│   ├── application/                # Use cases
 │   │   ├── task_service.go
 │   │   └── workflow_service.go
-│   ├── infrastructure/             # Implementações concretas
+│   ├── infrastructure/             # Concrete implementations
 │   │   ├── task_repository.go
 │   │   ├── workflow_repository.go
 │   │   ├── executors.go
@@ -148,7 +147,7 @@ SERVER_PORT=8080
 SERVER_READ_TIMEOUT=30
 SERVER_WRITE_TIMEOUT=30
 
-# Database (para futuras implementações)
+# Database (for future implementations)
 DATABASE_TYPE=memory
 DATABASE_HOST=localhost
 DATABASE_PORT=5432
@@ -161,7 +160,7 @@ LOGGING_LEVEL=info
 LOGGING_FORMAT=json
 ```
 
-### Arquivo config.yaml (opcional)
+### config.yaml file (optional)
 
 ```yaml
 server:
@@ -186,10 +185,10 @@ logging:
 
 ## 📊 API GraphQL
 
-### Queries Disponíveis
+### Available Queries
 
 ```graphql
-# Buscar todas as tasks
+# Get all tasks
 query {
   tasks {
     id
@@ -205,7 +204,7 @@ query {
   }
 }
 
-# Buscar uma task específica
+# Get a specific task
 query {
   task(id: "task-id") {
     id
@@ -214,7 +213,7 @@ query {
   }
 }
 
-# Buscar todos os workflows
+# Get all workflows
 query {
   workflows {
     id
@@ -229,14 +228,14 @@ query {
 }
 ```
 
-### Mutations Disponíveis
+### Available Mutations
 
 ```graphql
-# Criar uma task
+# Create a task
 mutation {
   createTask(input: {
-    name: "Minha Task"
-    description: "Descrição da task"
+    name: "My Task"
+    description: "Task description"
     parameters: [
       {
         key: "param1"
@@ -353,25 +352,25 @@ EXPOSE 8080
 CMD ["./hub-core"]
 ```
 
-## 🤝 Contribuindo
+## 🤝 Contributing
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📝 Próximos Passos
+## 📝 Next Steps
 
-- [ ] Implementar persistência em banco de dados (PostgreSQL/MongoDB)
-- [ ] Adicionar autenticação e autorização
-- [ ] Implementar sistema de plugins para diferentes tipos de automação
-- [ ] Adicionar testes unitários e de integração
-- [ ] Implementar subscriptions em tempo real
-- [ ] Adicionar métricas e observabilidade
-- [ ] Criar interface web/admin
-- [ ] Documentar APIs REST complementares
+- [ ] Implement database persistence (PostgreSQL/MongoDB)
+- [ ] Add authentication and authorization
+- [ ] Implement plugin system for different automation types
+- [ ] Add unit and integration tests
+- [ ] Implement real-time subscriptions
+- [ ] Add metrics and observability
+- [ ] Create web/admin interface
+- [ ] Document complementary REST APIs
 
-## 📄 Licença
+## 📄 License
 
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+This project is under the MIT license. See the `LICENSE` file for more details.

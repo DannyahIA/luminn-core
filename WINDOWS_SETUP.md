@@ -1,59 +1,59 @@
 # Automation Hub Core - Windows Setup Guide
 
-Este guia é específico para usuários Windows que querem executar o Automation Hub Core.
+This guide is specific for Windows users who want to run the Automation Hub Core.
 
-## 🚀 Configuração Rápida
+## 🚀 Quick Setup
 
-### 1. Pré-requisitos
+### 1. Prerequisites
 - [Go 1.22+](https://golang.org/dl/) 
 - [Git](https://git-scm.com/downloads)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (opcional)
-- Windows PowerShell 5.1+ (já incluído no Windows)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (optional)
+- Windows PowerShell 5.1+ (already included in Windows)
 
-### 2. Verificar Instalação
+### 2. Verify Installation
 ```powershell
-# Verificar Go
+# Check Go
 go version
 
-# Verificar Git
+# Check Git
 git --version
 
-# Verificar Docker (opcional)
+# Check Docker (optional)
 docker --version
 ```
 
-### 3. Clonar e Configurar
+### 3. Clone and Configure
 ```powershell
-# Clonar repositório
-git clone <repository-url>
-cd automation-hub
+# Clone repository
+git clone https://github.com/DannyahIA/automation-hub-core.git
+cd automation-hub-core
 
-# Instalar dependências
+# Install dependencies
 go mod tidy
 
-# Gerar código GraphQL
+# Generate GraphQL code
 go run github.com/99designs/gqlgen@latest generate
 ```
 
-### 4. Executar Aplicação
+### 4. Run Application
 ```powershell
-# Método 1: Comando direto
+# Method 1: Direct command
 go run cmd/hub-core/main.go
 
-# Método 2: Script helper
+# Method 2: Helper script
 .\dev.ps1 run
 
-# Método 3: Com live reload (instalar air primeiro)
+# Method 3: With live reload (install air first)
 go install github.com/cosmtrek/air@latest
 .\dev.ps1 run -Watch
 ```
 
-### 5. Testar API
+### 5. Test API
 ```powershell
-# Executar exemplos
+# Run examples
 .\examples\api_usage_example.ps1
 
-# Com output detalhado
+# With detailed output
 .\examples\api_usage_example.ps1 -Verbose
 ```
 
