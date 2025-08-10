@@ -1,0 +1,187 @@
+# Automation Hub Core GraphQL Schema
+
+"""
+Represents a task in the automation system
+"""
+type Task {
+  id: ID!
+  name: String!
+  description: String
+  status: TaskStatus!
+  createdAt: String!
+  updatedAt: String!
+  executedAt: String
+  parameters: [Parameter!]!
+}
+
+"""
+Possible statuses for a task
+"""
+enum TaskStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+"""
+Represents a parameter for a task
+"""
+type Parameter {
+  key: String!
+  value: String!
+  type: ParameterType!
+}
+
+"""
+Types of parameters
+"""
+enum ParameterType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+}
+
+"""
+Input for creating a new task
+"""
+input CreateTaskInput {
+  name: String!
+  description: String
+  parameters: [ParameterInput!]
+}
+
+"""
+Input for task parameters
+"""
+input ParameterInput {
+  key: String!
+  value: String!
+  type: ParameterType!
+}
+
+"""
+Input for updating a task
+"""
+input UpdateTaskInput {
+  id: ID!
+  name: String
+  description: String
+  status: TaskStatus
+  parameters: [ParameterInput!]
+}
+
+"""
+Automation workflow
+"""
+type Workflow {
+  id: ID!
+  name: String!
+  description: String
+  tasks: [Task!]!
+  status: WorkflowStatus!
+  createdAt: String!
+  updatedAt: String!
+}
+
+"""
+Workflow status
+"""
+enum WorkflowStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  FAILED
+}
+
+"""
+Input for creating a workflow
+"""
+input CreateWorkflowInput {
+  name: String!
+  description: String
+  taskIds: [ID!]!
+}
+
+"""
+The root query type
+"""
+type Query {
+  """
+  Get all tasks
+  """
+  tasks: [Task!]!
+  
+  """
+  Get a task by ID
+  """
+  task(id: ID!): Task
+  
+  """
+  Get all workflows
+  """
+  workflows: [Workflow!]!
+  
+  """
+  Get a workflow by ID
+  """
+  workflow(id: ID!): Workflow
+  
+  """
+  Health check endpoint
+  """
+  health: String!
+}
+
+"""
+The root mutation type
+"""
+type Mutation {
+  """
+  Create a new task
+  """
+  createTask(input: CreateTaskInput!): Task!
+  
+  """
+  Update an existing task
+  """
+  updateTask(input: UpdateTaskInput!): Task!
+  
+  """
+  Delete a task
+  """
+  deleteTask(id: ID!): Boolean!
+  
+  """
+  Execute a task
+  """
+  executeTask(id: ID!): Task!
+  
+  """
+  Create a new workflow
+  """
+  createWorkflow(input: CreateWorkflowInput!): Workflow!
+  
+  """
+  Execute a workflow
+  """
+  executeWorkflow(id: ID!): Workflow!
+}
+
+"""
+Subscription for real-time updates
+"""
+type Subscription {
+  """
+  Subscribe to task status changes
+  """
+  taskStatusChanged(taskId: ID): Task!
+  
+  """
+  Subscribe to workflow status changes
+  """
+  workflowStatusChanged(workflowId: ID): Workflow!
+}
