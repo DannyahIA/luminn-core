@@ -1,5 +1,17 @@
 # Automation Hub Core GraphQL Schema
 
+
+"""
+Represents a bank
+"""
+type Bank {
+  id: ID!
+  userId: ID!
+  name: String!
+  createdAt: String
+  updatedAt: String
+}
+
 """
 Represents a task in the automation system
 """
@@ -9,9 +21,18 @@ type Task {
   description: String
   status: TaskStatus!
   createdAt: String!
-  updatedAt: String!
-  executedAt: String
-  parameters: [Parameter!]!
+}
+
+type BankAccount {
+  id: ID!
+  userId: ID!
+  bankId: ID!
+  accountId: String!
+  type: String!
+  balance: Float!
+  currencyCode: String!
+  createdAt: String
+  updatedAt: String
 }
 
 """
@@ -26,12 +47,15 @@ enum TaskStatus {
 }
 
 """
+
 Represents a parameter for a task
 """
+
 type Parameter {
   key: String!
   value: String!
   type: ParameterType!
+
 }
 
 """
@@ -62,15 +86,49 @@ input ParameterInput {
   type: ParameterType!
 }
 
+
 """
-Input for updating a task
+Represents a bank item
 """
-input UpdateTaskInput {
+type BankItem {
   id: ID!
-  name: String
+  bankId: ID!
+  name: String!
+  status: String
+  executionStatus: String
+  createdAt: String
+  updatedAt: String
+}
+
+"""
+Represents bank data
+"""
+type BankData {
+  id: ID!
+  bankAccountId: ID!
+  transferNumber: String
+  closingBalance: Float
+  automaticallyInvestedBalance: Float
+  overdraftContractedLimit: Float
+  overdraftUsedLimit: Float
+  unarrangedOverdraftAmount: Float
+  createdAt: String
+  updatedAt: String
+}
+
+"""
+Represents a transaction
+"""
+type Transaction {
+  id: ID!
+  bankId: ID!
+  type: String!
+  amount: Float!
+  currency: String!
   description: String
-  status: TaskStatus
-  parameters: [ParameterInput!]
+  transactionDate: String
+  createdAt: String
+  updatedAt: String
 }
 
 """
@@ -107,6 +165,17 @@ input CreateWorkflowInput {
 }
 
 """
+Represents a product
+"""
+type Product {
+  id: ID!
+  bankItemId: ID!
+  name: String!
+  createdAt: String
+  updatedAt: String
+}
+
+"""
 The root query type
 """
 type Query {
@@ -114,26 +183,24 @@ type Query {
   Get all tasks
   """
   tasks: [Task!]!
-  
-  """
-  Get a task by ID
-  """
-  task(id: ID!): Task
-  
-  """
-  Get all workflows
-  """
-  workflows: [Workflow!]!
-  
-  """
-  Get a workflow by ID
-  """
-  workflow(id: ID!): Workflow
-  
-  """
-  Health check endpoint
-  """
-  health: String!
+  users: [User!]!
+  banks: [Bank!]!
+  bankAccounts: [BankAccount!]!
+  transactions: [Transaction!]!
+  bankData: [BankData!]!
+  bankItems: [BankItem!]!
+  products: [Product!]!
+}
+
+"""
+Input for updating a task
+"""
+input UpdateTaskInput {
+  id: ID!
+  name: String
+  description: String
+  status: TaskStatus
+  parameters: [ParameterInput!]
 }
 
 """
@@ -184,4 +251,13 @@ type Subscription {
   Subscribe to workflow status changes
   """
   workflowStatusChanged(workflowId: ID): Workflow!
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  phoneNumber: String
+  createdAt: String
+  updatedAt: String
 }

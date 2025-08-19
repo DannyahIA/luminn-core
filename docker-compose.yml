@@ -1,49 +1,79 @@
 version: '3.8'
 
 services:
-  automation-hub:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    environment:
-      - SERVER_HOST=0.0.0.0
-      - SERVER_PORT=8080
-      - DATABASE_TYPE=postgres
-      - DATABASE_HOST=postgres
-      - DATABASE_PORT=5432
-      - DATABASE_NAME=automation_hub
-      - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=postgres
-      - LOGGING_LEVEL=info
-      - LOGGING_FORMAT=json
-    volumes:
-      - ./config.yaml:/app/config.yaml:ro
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    restart: unless-stopped
+  # automation-hub:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     - SERVER_HOST=0.0.0.0
+  #     - SERVER_PORT=8080
+  #     - DATABASE_TYPE=postgres
+  #     - DATABASE_HOST=postgres
+  #     - DATABASE_PORT=5432
+  #     - DATABASE_NAME=bankhub
+  #     - DATABASE_USER=bankhub_user
+  #     - DATABASE_PASSWORD=bankhub_secure_password_2024
+  #     - DATABASE_URL=postgresql://bankhub_user:bankhub_secure_password_2024@postgres:5432/bankhub
+  #     - LOGGING_LEVEL=info
+  #     - LOGGING_FORMAT=json
+  #   volumes:
+  #     - ./config.yaml:/app/config.yaml:ro
+  #   networks:
+  #     - automation_hub_network
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
+  #   restart: unless-stopped
 
-  # PostgreSQL database (for future use)
+  # PostgreSQL database
   postgres:
     image: postgres:15-alpine
+    container_name: automation_hub_postgres
     environment:
-      POSTGRES_DB: automation_hub
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bankhub
+      POSTGRES_USER: bankhub_user
+      POSTGRES_PASSWORD: bankhub_secure_password_2024
+      POSTGRES_HOST_AUTH_METHOD: md5
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./modules/database/prisma/migrations:/docker-entrypoint-initdb.d/
+    networks:
+      - automation_hub_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U bankhub_user -d bankhub"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+
+  # PgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: automation_hub_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@automation-hub.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "8081:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - automation_hub_network
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
   # Redis (for future caching and pub/sub)
@@ -53,6 +83,8 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    networks:
+      - automation_hub_network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -93,6 +125,11 @@ services:
 
 volumes:
   postgres_data:
+  pgadmin_data:
   redis_data:
   grafana_data:
   prometheus_data:
+
+networks:
+  automation_hub_network:
+    driver: bridge

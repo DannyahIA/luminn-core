@@ -8,6 +8,7 @@ import (
 	"automation-hub/graph/model"
 	"automation-hub/internal/domain"
 	"context"
+	"fmt"
 )
 
 // CreateTask is the resolver for the createTask field.
@@ -102,57 +103,164 @@ func (r *queryResolver) Tasks(ctx context.Context) ([]*model.Task, error) {
 	return result, nil
 }
 
-// Task is the resolver for the task field.
-func (r *queryResolver) Task(ctx context.Context, id string) (*model.Task, error) {
-	task, err := r.TaskService.GetTask(ctx, id)
+// Users is the resolver for the users field.
+func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
+	users, err := r.UserRepo.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return convertDomainTaskToGraphQL(task), nil
-}
-
-// Workflows is the resolver for the workflows field.
-func (r *queryResolver) Workflows(ctx context.Context) ([]*model.Workflow, error) {
-	workflows, err := r.WorkflowService.GetAllWorkflows(ctx)
-	if err != nil {
-		return nil, err
+	var result []*model.User
+	for _, u := range users {
+		phone := u.PhoneNumber
+		created := u.CreatedAt.String()
+		updated := u.UpdatedAt.String()
+		result = append(result, &model.User{
+			ID:          u.ID,
+			Name:        u.Name,
+			Email:       u.Email,
+			PhoneNumber: &phone,
+			CreatedAt:   &created,
+			UpdatedAt:   &updated,
+		})
 	}
-
-	result := make([]*model.Workflow, len(workflows))
-	for i, workflow := range workflows {
-		// Get tasks for this workflow
-		tasks, err := r.WorkflowService.GetWorkflowTasks(ctx, workflow.ID)
-		if err != nil {
-			// Log error but continue with empty tasks
-			tasks = []*domain.Task{}
-		}
-		result[i] = convertDomainWorkflowToGraphQL(workflow, tasks)
-	}
-
 	return result, nil
 }
 
-// Workflow is the resolver for the workflow field.
-func (r *queryResolver) Workflow(ctx context.Context, id string) (*model.Workflow, error) {
-	workflow, err := r.WorkflowService.GetWorkflow(ctx, id)
+// Banks is the resolver for the banks field.
+func (r *queryResolver) Banks(ctx context.Context) ([]*model.Bank, error) {
+	banks, err := r.BankRepo.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
-
-	// Get tasks for this workflow
-	tasks, err := r.WorkflowService.GetWorkflowTasks(ctx, workflow.ID)
-	if err != nil {
-		// Log error but continue with empty tasks
-		tasks = []*domain.Task{}
+	var result []*model.Bank
+	for _, b := range banks {
+		created := b.CreatedAt.String()
+		updated := b.UpdatedAt.String()
+		result = append(result, &model.Bank{
+			ID:        b.ID,
+			UserID:    b.UserID,
+			Name:      b.Name,
+			CreatedAt: &created,
+			UpdatedAt: &updated,
+		})
 	}
-
-	return convertDomainWorkflowToGraphQL(workflow, tasks), nil
+	return result, nil
 }
 
-// Health is the resolver for the health field.
-func (r *queryResolver) Health(ctx context.Context) (string, error) {
-	return "OK", nil
+// BankAccounts is the resolver for the bankAccounts field.
+func (r *queryResolver) BankAccounts(ctx context.Context) ([]*model.BankAccount, error) {
+	accounts, err := r.BankAccountRepo.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var result []*model.BankAccount
+	for _, a := range accounts {
+		created := a.CreatedAt.String()
+		updated := a.UpdatedAt.String()
+		result = append(result, &model.BankAccount{
+			ID:           a.ID,
+			UserID:       a.UserID,
+			BankID:       a.BankID,
+			AccountID:    a.AccountID,
+			Type:         a.Type,
+			Balance:      a.Balance,
+			CurrencyCode: a.CurrencyCode,
+			CreatedAt:    &created,
+			UpdatedAt:    &updated,
+		})
+	}
+	return result, nil
+}
+
+// Transactions is the resolver for the transactions field.
+func (r *queryResolver) Transactions(ctx context.Context) ([]*model.Transaction, error) {
+	transactions, err := r.TransactionRepo.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var result []*model.Transaction
+	for _, t := range transactions {
+		transactionDate := t.TransactionDate.String()
+		created := t.CreatedAt.String()
+		updated := t.UpdatedAt.String()
+		description := t.Description
+		result = append(result, &model.Transaction{
+			ID:              t.ID,
+			BankID:          t.BankID,
+			Type:            t.Type,
+			Amount:          t.Amount,
+			Currency:        t.Currency,
+			Description:     &description,
+			TransactionDate: &transactionDate,
+			CreatedAt:       &created,
+			UpdatedAt:       &updated,
+		})
+	}
+	return result, nil
+}
+
+// BankData is the resolver for the bankData field.
+func (r *queryResolver) BankData(ctx context.Context) ([]*model.BankData, error) {
+	data, err := r.BankDataRepo.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var result []*model.BankData
+	for _, d := range data {
+		created := d.CreatedAt.String()
+		updated := d.UpdatedAt.String()
+		transferNumber := d.TransferNumber
+		closingBalance := d.ClosingBalance
+		automaticallyInvestedBalance := d.AutomaticallyInvestedBalance
+		overdraftContractedLimit := d.OverdraftContractedLimit
+		overdraftUsedLimit := d.OverdraftUsedLimit
+		unarrangedOverdraftAmount := d.UnarrangedOverdraftAmount
+		result = append(result, &model.BankData{
+			ID:                           d.ID,
+			BankAccountID:                d.BankAccountID,
+			TransferNumber:               &transferNumber,
+			ClosingBalance:               &closingBalance,
+			AutomaticallyInvestedBalance: &automaticallyInvestedBalance,
+			OverdraftContractedLimit:     &overdraftContractedLimit,
+			OverdraftUsedLimit:           &overdraftUsedLimit,
+			UnarrangedOverdraftAmount:    &unarrangedOverdraftAmount,
+			CreatedAt:                    &created,
+			UpdatedAt:                    &updated,
+		})
+	}
+	return result, nil
+}
+
+// BankItems is the resolver for the bankItems field.
+func (r *queryResolver) BankItems(ctx context.Context) ([]*model.BankItem, error) {
+	items, err := r.BankItemRepo.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var result []*model.BankItem
+	for _, i := range items {
+		created := i.CreatedAt.String()
+		updated := i.UpdatedAt.String()
+		status := i.Status
+		executionStatus := i.ExecutionStatus
+		result = append(result, &model.BankItem{
+			ID:              i.ID,
+			BankID:          i.BankID,
+			Name:            i.Name,
+			Status:          &status,
+			ExecutionStatus: &executionStatus,
+			CreatedAt:       &created,
+			UpdatedAt:       &updated,
+		})
+	}
+	return result, nil
+	// ...fim do arquivo...
+}
+
+// Products is the resolver for the products field.
+func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) {
+	panic(fmt.Errorf("not implemented: Products - products"))
 }
 
 // TaskStatusChanged is the resolver for the taskStatusChanged field.

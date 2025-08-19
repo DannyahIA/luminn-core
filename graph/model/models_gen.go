@@ -9,6 +9,52 @@ import (
 	"strconv"
 )
 
+// Represents a bank
+type Bank struct {
+	ID        string  `json:"id"`
+	UserID    string  `json:"userId"`
+	Name      string  `json:"name"`
+	CreatedAt *string `json:"createdAt,omitempty"`
+	UpdatedAt *string `json:"updatedAt,omitempty"`
+}
+
+type BankAccount struct {
+	ID           string  `json:"id"`
+	UserID       string  `json:"userId"`
+	BankID       string  `json:"bankId"`
+	AccountID    string  `json:"accountId"`
+	Type         string  `json:"type"`
+	Balance      float64 `json:"balance"`
+	CurrencyCode string  `json:"currencyCode"`
+	CreatedAt    *string `json:"createdAt,omitempty"`
+	UpdatedAt    *string `json:"updatedAt,omitempty"`
+}
+
+// Represents bank data
+type BankData struct {
+	ID                           string   `json:"id"`
+	BankAccountID                string   `json:"bankAccountId"`
+	TransferNumber               *string  `json:"transferNumber,omitempty"`
+	ClosingBalance               *float64 `json:"closingBalance,omitempty"`
+	AutomaticallyInvestedBalance *float64 `json:"automaticallyInvestedBalance,omitempty"`
+	OverdraftContractedLimit     *float64 `json:"overdraftContractedLimit,omitempty"`
+	OverdraftUsedLimit           *float64 `json:"overdraftUsedLimit,omitempty"`
+	UnarrangedOverdraftAmount    *float64 `json:"unarrangedOverdraftAmount,omitempty"`
+	CreatedAt                    *string  `json:"createdAt,omitempty"`
+	UpdatedAt                    *string  `json:"updatedAt,omitempty"`
+}
+
+// Represents a bank item
+type BankItem struct {
+	ID              string  `json:"id"`
+	BankID          string  `json:"bankId"`
+	Name            string  `json:"name"`
+	Status          *string `json:"status,omitempty"`
+	ExecutionStatus *string `json:"executionStatus,omitempty"`
+	CreatedAt       *string `json:"createdAt,omitempty"`
+	UpdatedAt       *string `json:"updatedAt,omitempty"`
+}
+
 // Input for creating a new task
 type CreateTaskInput struct {
 	Name        string            `json:"name"`
@@ -41,6 +87,15 @@ type ParameterInput struct {
 	Type  ParameterType `json:"type"`
 }
 
+// Represents a product
+type Product struct {
+	ID         string  `json:"id"`
+	BankItemID string  `json:"bankItemId"`
+	Name       string  `json:"name"`
+	CreatedAt  *string `json:"createdAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
 // The root query type
 type Query struct {
 }
@@ -51,14 +106,24 @@ type Subscription struct {
 
 // Represents a task in the automation system
 type Task struct {
-	ID          string       `json:"id"`
-	Name        string       `json:"name"`
-	Description *string      `json:"description,omitempty"`
-	Status      TaskStatus   `json:"status"`
-	CreatedAt   string       `json:"createdAt"`
-	UpdatedAt   string       `json:"updatedAt"`
-	ExecutedAt  *string      `json:"executedAt,omitempty"`
-	Parameters  []*Parameter `json:"parameters"`
+	ID          string     `json:"id"`
+	Name        string     `json:"name"`
+	Description *string    `json:"description,omitempty"`
+	Status      TaskStatus `json:"status"`
+	CreatedAt   string     `json:"createdAt"`
+}
+
+// Represents a transaction
+type Transaction struct {
+	ID              string  `json:"id"`
+	BankID          string  `json:"bankId"`
+	Type            string  `json:"type"`
+	Amount          float64 `json:"amount"`
+	Currency        string  `json:"currency"`
+	Description     *string `json:"description,omitempty"`
+	TransactionDate *string `json:"transactionDate,omitempty"`
+	CreatedAt       *string `json:"createdAt,omitempty"`
+	UpdatedAt       *string `json:"updatedAt,omitempty"`
 }
 
 // Input for updating a task
@@ -68,6 +133,15 @@ type UpdateTaskInput struct {
 	Description *string           `json:"description,omitempty"`
 	Status      *TaskStatus       `json:"status,omitempty"`
 	Parameters  []*ParameterInput `json:"parameters,omitempty"`
+}
+
+type User struct {
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Email       string  `json:"email"`
+	PhoneNumber *string `json:"phoneNumber,omitempty"`
+	CreatedAt   *string `json:"createdAt,omitempty"`
+	UpdatedAt   *string `json:"updatedAt,omitempty"`
 }
 
 // Automation workflow

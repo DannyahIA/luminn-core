@@ -107,6 +107,13 @@ func main() {
 type Dependencies struct {
 	TaskService     *application.TaskService
 	WorkflowService *application.WorkflowService
+	BankRepo        *infrastructure.BankRepository
+	UserRepo        *infrastructure.UserRepository
+	ProductRepo     *infrastructure.ProductRepository
+	TransactionRepo *infrastructure.TransactionRepository
+	BankItemRepo    *infrastructure.BankItemRepository
+	BankDataRepo    *infrastructure.BankDataRepository
+	BankAccountRepo *infrastructure.BankAccountRepository
 }
 
 // initializeDependencies initializes all application dependencies

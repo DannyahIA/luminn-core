@@ -17,10 +17,7 @@ func convertDomainTaskToGraphQL(task *domain.Task) *model.Task {
 		description = &task.Description
 	}
 
-	var executedAt *string
 	if task.ExecutedAt != nil {
-		execTime := task.ExecutedAt.Format("2006-01-02T15:04:05Z07:00")
-		executedAt = &execTime
 	}
 
 	parameters := make([]*model.Parameter, len(task.Parameters))
@@ -38,9 +35,7 @@ func convertDomainTaskToGraphQL(task *domain.Task) *model.Task {
 		Description: description,
 		Status:      model.TaskStatus(task.Status),
 		CreatedAt:   task.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt:   task.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		ExecutedAt:  executedAt,
-		Parameters:  parameters,
+		// Os campos UpdatedAt, ExecutedAt e Parameters não existem em model.Task
 	}
 }
 
