@@ -1,7 +1,4 @@
-### Aura Project
-
----
-
+### [Aura's Project](https://aura-project-pi.vercel.app/)
 # Aura Core
 Aura is a modular personal automation hub designed to centralize and manage data, orchestrating intelligent workflows across various services. Built on a hexagonal architecture with lightweight microservices, the Core acts as the central brain, ensuring business logic remains independent of external integrations. It provides a robust, scalable, and secure foundation for all personal automation needs, accessible via web panels, mobile apps, and voice assistants like Alexa.
 
