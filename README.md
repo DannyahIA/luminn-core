@@ -1,6 +1,9 @@
-# Automation Hub Core
+### Aura Project
 
-The core of Automation Hub, responsible for orchestrating automations and integrations using hexagonal architecture and GraphQL.
+---
+
+# Aura Core
+Aura is a modular personal automation hub designed to centralize and manage data, orchestrating intelligent workflows across various services. Built on a hexagonal architecture with lightweight microservices, the Core acts as the central brain, ensuring business logic remains independent of external integrations. It provides a robust, scalable, and secure foundation for all personal automation needs, accessible via web panels, mobile apps, and voice assistants like Alexa.
 
 ## 🏗️ Architecture
 
@@ -23,8 +26,8 @@ This project follows **hexagonal architecture** (ports & adapters) with the foll
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/DannyahIA/automation-hub-core.git
-cd automation-hub-core
+git clone https://github.com/DannyahIA/aura-core.git
+cd aura-core
 ```
 
 2. Initialize Go module and install dependencies:
