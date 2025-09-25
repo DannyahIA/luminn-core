@@ -1,0 +1,7 @@
+onlyBuiltDependencies:
+  - '@apollo/protobufjs'
+  - '@prisma/client'
+  - '@prisma/engines'
+  - esbuild
+  - prisma
+  - type-graphql

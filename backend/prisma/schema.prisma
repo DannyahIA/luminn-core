@@ -1,0 +1,171 @@
+// Prisma Schema for Automation Hub Backend
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  password    String
+  phoneNumber String?  @map("phone_number")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  banks              Bank[]
+  bankAccounts       BankAccount[]
+  pluggyCredentials  PluggyCredentials[]
+
+  @@map("users")
+}
+
+// Pluggy API credentials
+model PluggyCredentials {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  clientId     String?  @map("client_id")
+  clientSecret String?  @map("client_secret")
+  baseUrl      String?  @map("base_url")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("pluggy_credentials")
+}
+
+// Bank model
+model Bank {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  name      String?
+  type      String?  // Added type field
+  isActive  Boolean? @default(true) @map("is_active") // Added isActive field
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bankAccounts BankAccount[]
+  bankItems    BankItem[]
+  transactions Transaction[]
+
+  @@map("bank")
+}
+
+// Bank account model
+model BankAccount {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  bankId       String   @map("bank_id")
+  accountId    String?  @map("account_id")
+  type         String?
+  balance      Decimal? @db.Decimal(15, 2)
+  currencyCode String?  @map("currency_code")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bank     Bank       @relation(fields: [bankId], references: [id], onDelete: Cascade)
+  bankData BankData[]
+
+  @@map("bank_account")
+}
+
+// Bank account additional data
+model BankData {
+  id                            String   @id @default(cuid())
+  bankAccountId                 String   @map("bank_account_id")
+  transferNumber                String?  @map("transfer_number")
+  closingBalance                Decimal? @map("closing_balance") @db.Decimal(15, 2)
+  automaticallyInvestedBalance  Decimal? @map("automatically_invested_balance") @db.Decimal(15, 2)
+  overdraftContractedLimit      Decimal? @map("overdraft_contracted_limit") @db.Decimal(15, 2)
+  overdraftUsedLimit            Decimal? @map("overdraft_used_limit") @db.Decimal(15, 2)
+  unarrangedOverdraftAmount     Decimal? @map("unarranged_overdraft_amount") @db.Decimal(15, 2)
+  createdAt                     DateTime @default(now()) @map("created_at")
+  updatedAt                     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  bankAccount BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+
+  @@map("bank_data")
+}
+
+// Bank item model
+model BankItem {
+  id              String   @id @default(cuid())
+  bankId          String   @map("bank_id")
+  name            String?
+  status          String?
+  executionStatus String?  @map("execution_status")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  bank     Bank      @relation(fields: [bankId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@map("bank_item")
+}
+
+// Product model
+model Product {
+  id         String   @id @default(cuid())
+  bankItemId String   @map("bank_item_id")
+  name       String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  bankItem BankItem @relation(fields: [bankItemId], references: [id], onDelete: Cascade)
+
+  @@map("products")
+}
+
+// Transaction model
+model Transaction {
+  id              String    @id @default(cuid())
+  bankId          String    @map("bank_id")
+  type            String?
+  amount          Decimal?  @db.Decimal(15, 2)
+  currency        String?
+  description     String?
+  category        String?   // Added category field
+  transactionDate DateTime? @map("transaction_date")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  bank Bank @relation(fields: [bankId], references: [id], onDelete: Cascade)
+
+  @@index([transactionDate])
+  @@index([type])
+  @@map("transaction")
+}
+
+// External ID mapping for module integration
+model ExternalMapping {
+  id          String    @id @default(cuid())
+  externalId  String    @map("external_id")
+  internalId  String    @map("internal_id")
+  entityType  String    @map("entity_type") // 'user', 'bank', 'transaction', etc.
+  module      String    // 'bank-hub', 'website-hub', etc.
+  metadata    Json?     // Additional metadata for the mapping
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@unique([externalId, module, entityType], name: "external_id_module")
+  @@index([internalId])
+  @@index([entityType])
+  @@index([module])
+  @@map("external_mapping")
+}

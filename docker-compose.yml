@@ -1,48 +1,42 @@
 version: '3.8'
 
 services:
-  # automation-hub:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8080:8080"
-  #   environment:
-  #     - SERVER_HOST=0.0.0.0
-  #     - SERVER_PORT=8080
-  #     - DATABASE_TYPE=postgres
-  #     - DATABASE_HOST=postgres
-  #     - DATABASE_PORT=5432
-  #     - DATABASE_NAME=bankhub
-  #     - DATABASE_USER=bankhub_user
-  #     - DATABASE_PASSWORD=bankhub_secure_password_2024
-  #     - DATABASE_URL=postgresql://bankhub_user:bankhub_secure_password_2024@postgres:5432/bankhub
-  #     - LOGGING_LEVEL=info
-  #     - LOGGING_FORMAT=json
-  #   volumes:
-  #     - ./config.yaml:/app/config.yaml:ro
-  #   networks:
-  #     - automation_hub_network
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   healthcheck:
-  #     test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
-  #   restart: unless-stopped
+  # Node.js/TypeScript GraphQL Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: automation_hub_backend
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/automation_hub
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - FRONTEND_URL=http://localhost:3000
+    networks:
+      - automation_hub_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
 
   # PostgreSQL database
   postgres:
     image: postgres:15-alpine
     container_name: automation_hub_postgres
     environment:
-      POSTGRES_DB: bankhub
-      POSTGRES_USER: bankhub_user
-      POSTGRES_PASSWORD: bankhub_secure_password_2024
-      POSTGRES_HOST_AUTH_METHOD: md5
+      POSTGRES_DB: automation_hub
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
     volumes:
@@ -51,7 +45,7 @@ services:
     networks:
       - automation_hub_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bankhub_user -d bankhub"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d automation_hub"]
       interval: 10s
       timeout: 5s
       retries: 5
