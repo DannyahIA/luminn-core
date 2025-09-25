@@ -1,31 +1,31 @@
 # Backend Dockerfile - Node.js/TypeScript
 FROM node:18-alpine AS base
 
-# Install pnpm
+# Instalar pnpm
 RUN npm install -g pnpm
 
-# Install dependencies only when needed
+# Instalar dependências apenas quando necessário
 FROM base AS deps
 WORKDIR /app
 
-# Copy pnpm and package.json manifest files
+# Copiar arquivos de manifesto do pnpm e package.json
 COPY package.json pnpm-lock.yaml ./
-# Install pnpm production dependencies
+# Instalar dependências de produção com pnpm
 RUN pnpm install --prod
 
-# Rebuild the source code only when needed
+# Reconstruir o código-fonte apenas quando necessário
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma client
+# Gerar o cliente Prisma
 RUN npx prisma generate
 
-# Build application
-RUN pnpm run build
+# Construir a aplicação
+RUN npm run build
 
-# Production image, copy all the files and run next
+# Imagem de produção, copie todos os arquivos e execute o aplicativo
 FROM base AS runner
 WORKDIR /app
 
@@ -34,7 +34,7 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 backend
 
-# Copy builded application and dependencies
+# Copiar aplicação construída e dependências
 COPY --from=builder --chown=backend:nodejs /app/dist ./dist
 COPY --from=builder --chown=backend:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=backend:nodejs /app/package.json ./package.json
@@ -44,6 +44,6 @@ USER backend
 
 EXPOSE 4000
 
-ENV PORT=4000
+ENV PORT 4000
 
 CMD ["node", "dist/index.js"]
