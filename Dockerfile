@@ -1,55 +1,45 @@
-# Build stage
-FROM golang:1.22-alpine AS builder
+# Backend Dockerfile - Node.js/TypeScript
+FROM node:18-alpine AS base
 
-# Set working directory
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install git (needed for some Go modules)
-RUN apk add --no-cache git
+# Copy package files
+COPY package.json package-lock.json* ./
+RUN npm ci --only=production
 
-# Copy go mod files
-COPY go.mod go.sum ./
-
-# Download dependencies
-RUN go mod download
-
-# Copy source code
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Generate Prisma client
+RUN npx prisma generate --schema=../modules/database/prisma/schema.prisma
+
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o hub-core cmd/hub-core/main.go
+RUN npm run build
 
-# Final stage
-FROM alpine:latest
-
-# Install ca-certificates for HTTPS requests
-RUN apk --no-cache add ca-certificates
-
-# Create non-root user
-RUN addgroup -g 1001 -S appgroup && \
-    adduser -u 1001 -S appuser -G appgroup
-
-# Set working directory
+# Production image, copy all the files and run the app
+FROM base AS runner
 WORKDIR /app
 
-# Copy the binary from builder stage
-COPY --from=builder /app/hub-core .
+ENV NODE_ENV=production
 
-# Copy config file (optional)
-COPY --from=builder /app/config.yaml ./config.yaml
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 backend
 
-# Change ownership to non-root user
-RUN chown -R appuser:appgroup /app
+# Copy built application
+COPY --from=builder --chown=backend:nodejs /app/dist ./dist
+COPY --from=builder --chown=backend:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=backend:nodejs /app/package.json ./package.json
 
-# Switch to non-root user
-USER appuser
+USER backend
 
-# Expose port
-EXPOSE 8080
+EXPOSE 4000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
+ENV PORT 4000
 
-# Command to run
-CMD ["./hub-core"]
+CMD ["node", "dist/index.js"]

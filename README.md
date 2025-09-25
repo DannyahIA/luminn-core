@@ -1,376 +1,327 @@
-### [Aura's Project](https://aura-project-pi.vercel.app/)
-# Aura Core
-Aura is a modular personal automation hub designed to centralize and manage data, orchestrating intelligent workflows across various services. Built on a hexagonal architecture with lightweight microservices, the Core acts as the central brain, ensuring business logic remains independent of external integrations. It provides a robust, scalable, and secure foundation for all personal automation needs, accessible via web panels, mobile apps, and voice assistants like Alexa.
+# Backend - Automation Hub 🚀
 
-## 🏗️ Architecture
+Backend GraphQL moderno em **Node.js/TypeScript** para o Automation Hub, substituindo a implementação em Go para melhor produtividade e integração com o ecossistema.
 
-This project follows **hexagonal architecture** (ports & adapters) with the following layers:
+## 🛠️ Stack Tecnológica
 
-- **Domain**: Pure business entities and rules
-- **Application**: Use cases that orchestrate the flow
-- **Infrastructure**: Concrete implementations (repositories, executors)
-- **Interfaces**: GraphQL resolvers and controllers
+- **Node.js** + **TypeScript** - Runtime e tipagem
+- **Apollo Server** - GraphQL server
+- **Type-GraphQL** - Schema-first GraphQL com decorators  
+- **Prisma** - ORM type-safe
+- **PostgreSQL** - Banco de dados
+- **Express** - Framework web
+- **JWT** - Autenticação
+- **bcrypt** - Hash de senhas
 
 ## 🚀 Quick Start
 
-### Prerequisites
-
-- Go 1.22+
-- Git
-- Docker (optional, for development with external services)
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/DannyahIA/aura-core.git
-cd aura-core
-```
-
-2. Initialize Go module and install dependencies:
-```bash
-go mod tidy
-```
-
-3. Generate GraphQL code:
-```bash
-go run github.com/99designs/gqlgen@latest generate
-```
-
-4. Run the application:
-
-**Linux/macOS:**
-```bash
-go run cmd/hub-core/main.go
-```
-
-**Windows (PowerShell):**
+### 1. Instalar Dependências
 ```powershell
-go run cmd/hub-core/main.go
-# Or use the helper script:
-.\dev.ps1 run
+.\backend-manager.ps1 -Action install
 ```
 
-5. Access the GraphQL Playground:
-```
-http://localhost:8080
-```
-
-### Windows Helper Scripts
-
-For Windows users, PowerShell scripts are included to facilitate development:
-
-**Development script (`dev.ps1`):**
+### 2. Configurar Banco de Dados
 ```powershell
-# Build application
-.\dev.ps1 build
+# Iniciar PostgreSQL (se ainda não estiver rodando)
+.\db-manager.ps1 -Action setup
 
-# Run application
-.\dev.ps1 run
-
-# Run tests
-.\dev.ps1 test
-
-# Start Docker services
-.\dev.ps1 docker-up
-
-# Stop Docker services
-.\dev.ps1 docker-down
-
-# Clean artifacts
-.\dev.ps1 clean
-
-# Download dependencies
-.\dev.ps1 deps
-
-# Generate GraphQL code
-.\dev.ps1 gen
-
-# Show help
-.\dev.ps1 help
+# Fazer push do schema
+.\backend-manager.ps1 -Action migrate
 ```
 
-**API example script (`examples/api_usage_example.ps1`):**
+### 3. Iniciar Desenvolvimento
 ```powershell
-# Run basic examples
-.\examples\api_usage_example.ps1
-
-# Run with detailed output
-.\examples\api_usage_example.ps1 -Verbose
-
-# Use different URL
-.\examples\api_usage_example.ps1 -ApiUrl "http://localhost:9000/query"
+.\backend-manager.ps1 -Action dev
 ```
 
-## 📁 Project Structure
+Acesse:
+- **GraphQL Playground**: http://localhost:4000/graphql
+- **Health Check**: http://localhost:4000/health
+
+## 📋 Comandos Disponíveis
+
+| Comando | Descrição |
+|---------|-----------|
+| `install` | Instalar dependências |
+| `dev` | Servidor de desenvolvimento |
+| `build` | Build para produção |
+| `start` | Iniciar servidor produção |
+| `test` | Executar testes |
+| `lint` | Executar ESLint |
+| `studio` | Abrir Prisma Studio |
+| `migrate` | Executar migrações |
+| `docker-build` | Build imagem Docker |
+| `docker-run` | Executar container |
+
+## 🗂️ Estrutura do Projeto
 
 ```
-automation-hub-core/
-├── cmd/
-│   └── hub-core/
-│       └── main.go                 # Entry point
-├── internal/
-│   ├── domain/                     # Entities and interfaces
-│   │   ├── task.go
-│   │   ├── workflow.go
-│   │   └── interfaces.go
-│   ├── application/                # Use cases
-│   │   ├── task_service.go
-│   │   └── workflow_service.go
-│   ├── infrastructure/             # Concrete implementations
-│   │   ├── task_repository.go
-│   │   ├── workflow_repository.go
-│   │   ├── executors.go
-│   │   └── services.go
-│   ├── interfaces/                 # Resolvers GraphQL
-│   └── config/                     # Configuração
-│       └── config.go
-├── graph/                          # Schema e código GraphQL
-│   ├── schema.graphqls
-│   ├── generated.go                # (gerado)
-│   └── resolver.go                 # (gerado)
-├── go.mod
-├── go.sum
-└── gqlgen.yml                      # Configuração do gqlgen
+backend/
+├── src/
+│   ├── index.ts              # Entry point
+│   ├── db/
+│   │   └── prisma.ts         # Database client
+│   ├── resolvers/            # GraphQL resolvers
+│   │   ├── AuthResolver.ts   # Autenticação
+│   │   ├── UserResolver.ts   # Usuários
+│   │   ├── BankResolver.ts   # Bancos
+│   │   └── TransactionResolver.ts # Transações
+│   └── types/
+│       └── context.ts        # GraphQL context
+├── dist/                     # Build output
+├── package.json             # Dependencies & scripts
+├── tsconfig.json            # TypeScript config
+├── Dockerfile              # Container config
+└── .env                    # Environment variables
 ```
 
 ## 🔧 Configuração
 
-A aplicação pode ser configurada através de variáveis de ambiente ou arquivo `config.yaml`:
+### Environment Variables (`.env`)
+```env
+# Server
+PORT=4000
+NODE_ENV=development
 
-### Variáveis de Ambiente
+# Database
+DATABASE_URL="postgresql://bankhub_user:bankhub_secure_password_2024@localhost:5432/bankhub"
 
-```bash
-# Servidor
-SERVER_HOST=localhost
-SERVER_PORT=8080
-SERVER_READ_TIMEOUT=30
-SERVER_WRITE_TIMEOUT=30
+# Auth
+JWT_SECRET="your-super-secret-jwt-key"
 
-# Database (for future implementations)
-DATABASE_TYPE=memory
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_NAME=automation_hub
-DATABASE_USER=postgres
-DATABASE_PASSWORD=
-
-# Logging
-LOGGING_LEVEL=info
-LOGGING_FORMAT=json
+# CORS
+FRONTEND_URL="http://localhost:3000"
 ```
 
-### config.yaml file (optional)
+## 📊 GraphQL Schema
 
-```yaml
-server:
-  host: localhost
-  port: 8080
-  read_timeout: 30
-  write_timeout: 30
-
-database:
-  type: memory
-  host: localhost
-  port: 5432
-  name: automation_hub
-  user: postgres
-  password: ""
-  ssl_mode: disable
-
-logging:
-  level: info
-  format: json
-```
-
-## 📊 API GraphQL
-
-### Available Queries
-
+### 🔐 Autenticação
 ```graphql
-# Get all tasks
-query {
-  tasks {
-    id
-    name
-    description
-    status
-    createdAt
-    parameters {
-      key
-      value
-      type
-    }
-  }
-}
-
-# Get a specific task
-query {
-  task(id: "task-id") {
-    id
-    name
-    status
-  }
-}
-
-# Get all workflows
-query {
-  workflows {
-    id
-    name
-    description
-    status
-    tasks {
+# Registro
+mutation Register {
+  register(
+    name: "João Silva"
+    email: "joao@email.com"
+    password: "123456"
+    phoneNumber: "+5511999999999"
+  ) {
+    accessToken
+    user {
       id
       name
+      email
+    }
+  }
+}
+
+# Login
+mutation Login {
+  login(email: "joao@email.com", password: "123456") {
+    accessToken
+    user {
+      id
+      name
+      email
     }
   }
 }
 ```
 
-### Available Mutations
-
+### 👤 Usuários
 ```graphql
-# Create a task
-mutation {
-  createTask(input: {
-    name: "My Task"
-    description: "Task description"
-    parameters: [
-      {
-        key: "param1"
-        value: "value1"
-        type: STRING
-      }
-    ]
-  }) {
+# Listar usuários
+query Users {
+  users {
     id
     name
-    status
+    email
+    phoneNumber
+    createdAt
   }
 }
 
-# Executar uma task
-mutation {
-  executeTask(id: "task-id") {
-    id
-    status
-    executedAt
-  }
-}
-
-# Criar um workflow
-mutation {
-  createWorkflow(input: {
-    name: "Meu Workflow"
-    description: "Descrição do workflow"
-    taskIds: ["task-id-1", "task-id-2"]
-  }) {
+# Buscar usuário
+query User {
+  user(id: "user-id") {
     id
     name
-    status
+    email
   }
 }
 ```
 
-## 🧪 Testes
+### 🏦 Bancos
+```graphql
+# Bancos do usuário
+query BanksByUser {
+  banksByUser(userId: "user-id") {
+    id
+    name
+    createdAt
+  }
+}
 
-Para executar os testes:
-
-```bash
-go test ./...
+# Criar banco
+mutation CreateBank {
+  createBank(userId: "user-id", name: "Banco do Brasil") {
+    id
+    name
+  }
+}
 ```
 
-Para executar com coverage:
+### 💰 Transações
+```graphql
+# Transações do usuário
+query TransactionsByUser {
+  transactionsByUser(userId: "user-id") {
+    id
+    type
+    amount
+    description
+    transactionDate
+  }
+}
 
-```bash
-go test -cover ./...
-```
-
-## 📦 Build
-
-Para buildar a aplicação:
-
-```bash
-go build -o bin/hub-core cmd/hub-core/main.go
-```
-
-**Windows (PowerShell):**
-```powershell
-go build -o bin/hub-core.exe cmd/hub-core/main.go
-# Ou usando o script helper:
-.\dev.ps1 build
-```
-
-Para buildar para diferentes plataformas:
-
-**Linux/macOS:**
-```bash
-# Linux
-GOOS=linux GOARCH=amd64 go build -o bin/hub-core-linux cmd/hub-core/main.go
-
-# Windows
-GOOS=windows GOARCH=amd64 go build -o bin/hub-core-windows.exe cmd/hub-core/main.go
-
-# macOS
-GOOS=darwin GOARCH=amd64 go build -o bin/hub-core-darwin cmd/hub-core/main.go
-```
-
-**Windows (PowerShell):**
-```powershell
-# Para Linux
-$env:GOOS="linux"; $env:GOARCH="amd64"; go build -o bin/hub-core-linux cmd/hub-core/main.go
-
-# Para macOS
-$env:GOOS="darwin"; $env:GOARCH="amd64"; go build -o bin/hub-core-darwin cmd/hub-core/main.go
-
-# Reset para Windows
-$env:GOOS="windows"; $env:GOARCH="amd64"; go build -o bin/hub-core.exe cmd/hub-core/main.go
+# Criar transação
+mutation CreateTransaction {
+  createTransaction(
+    bankId: "bank-id"
+    type: "CREDIT"
+    amount: 1500.00
+    currency: "BRL"
+    description: "Salário"
+    transactionDate: "2024-08-01T00:00:00Z"
+  ) {
+    id
+    amount
+    description
+  }
+}
 ```
 
 ## 🐳 Docker
 
-Dockerfile exemplo:
+### Build e Run
+```powershell
+# Build da imagem
+.\backend-manager.ps1 -Action docker-build
 
-```dockerfile
-FROM golang:1.22-alpine AS builder
-
-WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
-
-COPY . .
-RUN go build -o hub-core cmd/hub-core/main.go
-
-FROM alpine:latest
-RUN apk --no-cache add ca-certificates
-WORKDIR /root/
-
-COPY --from=builder /app/hub-core .
-
-EXPOSE 8080
-CMD ["./hub-core"]
+# Executar container
+.\backend-manager.ps1 -Action docker-run
 ```
 
-## 🤝 Contributing
+### Docker Compose
+```powershell
+# Iniciar todos os serviços (backend + database)
+docker-compose up -d
 
-1. Fork the project
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+# Logs
+docker-compose logs -f backend
+```
 
-## 📝 Next Steps
+## 🧪 Testes
 
-- [ ] Implement database persistence (PostgreSQL/MongoDB)
-- [ ] Add authentication and authorization
-- [ ] Implement plugin system for different automation types
-- [ ] Add unit and integration tests
-- [ ] Implement real-time subscriptions
-- [ ] Add metrics and observability
-- [ ] Create web/admin interface
-- [ ] Document complementary REST APIs
+```powershell
+# Executar todos os testes
+.\backend-manager.ps1 -Action test
 
-## 📄 License
+# Testes em watch mode
+cd backend
+pnpm test:watch
+```
 
-This project is under the MIT license. See the `LICENSE` file for more details.
+## 🔍 Debugging
+
+### Development
+```powershell
+# Servidor com hot reload
+.\backend-manager.ps1 -Action dev
+
+# Verificar health
+curl http://localhost:4000/health
+```
+
+### Logs
+```bash
+# Ver logs do container
+docker-compose logs -f backend
+
+# Logs em tempo real
+docker logs -f automation_hub_backend
+```
+
+## 🚀 Deploy
+
+### Produção Local
+```powershell
+# Build
+.\backend-manager.ps1 -Action build
+
+# Start produção
+.\backend-manager.ps1 -Action start
+```
+
+### Docker Deploy
+```bash
+# Build para produção
+docker build -t automation-hub-backend .
+
+# Deploy
+docker run -d -p 4000:4000 \
+  -e DATABASE_URL="postgresql://..." \
+  -e JWT_SECRET="..." \
+  automation-hub-backend
+```
+
+## 🔧 Desenvolvimento
+
+### Adicionar Nova Funcionalidade
+
+1. **Criar Resolver**:
+```typescript
+// src/resolvers/NewResolver.ts
+@Resolver()
+export class NewResolver {
+  @Query(() => String)
+  hello(): string {
+    return "Hello World!"
+  }
+}
+```
+
+2. **Registrar no Schema**:
+```typescript
+// src/index.ts
+const schema = await buildSchema({
+  resolvers: [
+    // ... outros resolvers
+    NewResolver
+  ]
+})
+```
+
+3. **Testar**:
+```powershell
+.\backend-manager.ps1 -Action dev
+# Acesse http://localhost:4000/graphql
+```
+
+## 🔒 Segurança
+
+- **JWT** para autenticação
+- **bcrypt** para hash de senhas
+- **CORS** configurado
+- **Environment variables** para secrets
+- **Validação** de entrada com class-validator
+
+## 📚 Recursos
+
+- [Apollo Server Docs](https://www.apollographql.com/docs/apollo-server/)
+- [Type-GraphQL Docs](https://typegraphql.com/)
+- [Prisma Docs](https://www.prisma.io/docs/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+
+---
+
+**Backend moderno e produtivo para Automation Hub!** ⚡
